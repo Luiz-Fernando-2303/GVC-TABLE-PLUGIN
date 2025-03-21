@@ -2,8 +2,6 @@
 using Autodesk.Revit.UI;
 using System.Windows;
 using System.Windows.Controls;
-using System;
-using System.IO;
 
 namespace GVC_TABLE_PLUGIN.Components
 {
