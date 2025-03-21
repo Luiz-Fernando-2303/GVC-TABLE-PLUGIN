@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Quantitativos - Construção</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #222;
+            color: white;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #333;
+        }
+
+        th,
+        td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: left;
+            background-color: #444;
+            cursor: pointer;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #3a3a3a;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #444;
+        }
+
+        .status-concluido {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-em-andamento {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .status-pendente {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Caixa de informações no canto inferior direito */
+        .info-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .info-box h3 {
+            margin: 0;
+            font-size: 16px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Relatório de Quantitativos - TESTE DO PLUGIN(PAINEL)</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descrição</th>
+                <th>Unidade</th>
+                <th>Quantidade Prevista</th>
+                <th>Quantidade Executada</th>
+                <th>Percentual Concluído</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tabela">
+            <tr data-id="1">
+                <td>001</td>
+                <td>Concreto para Fundação</td>
+                <td>m³</td>
+                <td>50</td>
+                <td>50</td>
+                <td>100%</td>
+                <td class="status-concluido">Concluído</td>
+            </tr>
+            <tr data-id="2">
+                <td>002</td>
+                <td>Estrutura Metálica</td>
+                <td>kg</td>
+                <td>1200</td>
+                <td>900</td>
+                <td>75%</td>
+                <td class="status-em-andamento">Em Andamento</td>
+            </tr>
+            <tr data-id="3">
+                <td>003</td>
+                <td>Pisos Cerâmicos</td>
+                <td>m²</td>
+                <td>500</td>
+                <td>200</td>
+                <td>40%</td>
+                <td class="status-em-andamento">Em Andamento</td>
+            </tr>
+            <tr data-id="4">
+                <td>004</td>
+                <td>Instalações Elétricas</td>
+                <td>m</td>
+                <td>1000</td>
+                <td>300</td>
+                <td>30%</td>
+                <td class="status-pendente">Pendente</td>
+            </tr>
+            <tr data-id="5">
+                <td>005</td>
+                <td>Pintura Interna</td>
+                <td>m²</td>
+                <td>800</td>
+                <td>0</td>
+                <td>0%</td>
+                <td class="status-pendente">Pendente</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Teste: Renderização de template em HTML</h4>
+    <h4>Obs: Bugs relativos a scripts são causados pela classe WebBrowser, alternar para WebView</h4>
+
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "GVC-TABLE-PLUGIN": {
+      "commandName": "Project"
+    },
+    "PLUGIN_DEBUG": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\Revit 2025\\Revit.exe"
+    }
+  }
+}
