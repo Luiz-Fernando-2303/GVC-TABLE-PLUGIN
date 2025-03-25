@@ -1,96 +1,117 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms.Integration;
+using WinForms = System.Windows.Forms;
 
 namespace GVC_TABLE_PLUGIN.Components
 {
-    public class TableInterface
+    public static class TableInterface
     {
-        private readonly ExternalCommandData commandData;
-
-        public TableInterface(ExternalCommandData commandData_)
+        public static void UpdatePanel(string guid, string html, WinForms.Form form)
         {
-            commandData = commandData_;
+            var dockableWindow = TableInterfaceRegister.GetRegisteredWindow(guid);
+
+            if (dockableWindow == null)
+            {
+                WinForms.MessageBox.Show("Painel não encontrado ou não registrado.");
+                return;
+            }
+
+            UIElement newContent = null;
+
+            if (!string.IsNullOrEmpty(html))
+            {
+                var browser = new WinForms.WebBrowser();
+                browser.DocumentText = html;
+                newContent = new WindowsFormsHost { Child = browser };
+            }
+            else if (form != null)
+            {
+                newContent = new WindowsFormsHost { Child = form };
+            }
+
+            dockableWindow.SetInternalContent(newContent);
         }
 
-        public DockablePane GetPanel(string guid)
+        public static DockablePane GetPanel(string guid)
         {
-            UIApplication uiApp = commandData.Application;
-            UIDocument uiDoc = uiApp.ActiveUIDocument;
-            Document document = uiDoc.Document;
-
             try
             {
-                DockablePaneId paneId = TableInterfaceRegister.GetPaneId(guid);
-                DockablePane pane = uiApp.GetDockablePane(paneId);
+                var uiApp = Context.RevitContext.UiApp;
 
-                if (pane == null)
+                if (uiApp == null)
                 {
-                    MessageBox.Show("O painel não foi encontrado.");
+                    WinForms.MessageBox.Show("Contexto do Revit não está disponível.");
                     return null;
                 }
 
-                return pane;
+                DockablePaneId paneId = TableInterfaceRegister.GetPaneId(guid);
+                return uiApp.GetDockablePane(paneId);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                WinForms.MessageBox.Show($"Erro ao obter painel: {ex.Message}");
                 return null;
             }
         }
     }
 
-    public class TableInterfaceRegister
+    public static class TableInterfaceRegister
     {
+        private static readonly Dictionary<string, DockableWindow> RegisteredWindows = new();
+
         public static DockablePaneId GetPaneId(string guid)
         {
             return new DockablePaneId(new Guid(guid));
         }
 
-        public static Dictionary<string, string> RegisterPanel(UIControlledApplication application, string name, string guid, string HTML)
+        public static void RegisterPanel(UIControlledApplication application, string name, string guid, string html, WinForms.Form form)
         {
             try
             {
                 DockablePaneId paneId = GetPaneId(guid);
-                DockableWindow panel = new (HTML);
+
+                var panel = new DockableWindow();
+                RegisteredWindows[guid] = panel;
 
                 application.RegisterDockablePane(paneId, name, panel);
-
-                return new Dictionary<string, string>
-                {
-                    {"guid", guid },
-                    {"name", name }
-                };
-
+                TableInterface.UpdatePanel(guid, html, form);
             }
             catch (Exception ex)
             {
                 TaskDialog.Show("RegisterPanel() - ERRO", ex.Message);
-                return null;
             }
         }
 
-        public static void UnregisterPanel(UIControlledApplication application, string guid)
+        public static DockableWindow GetRegisteredWindow(string guid)
         {
-            DockablePaneId id = GetPaneId(guid);
-
+            RegisteredWindows.TryGetValue(guid, out var window);
+            return window;
         }
     }
 
-    public class DockableWindow : UserControl, IDockablePaneProvider
+    public class DockableWindow : System.Windows.Controls.UserControl, IDockablePaneProvider
     {
-        public DockableWindow(string HTML)
-        {
-            WebBrowser webBrowser = new WebBrowser();
-            webBrowser.NavigateToString($"{HTML}");
+        private readonly ContentControl contentContainer;
 
-            Content = webBrowser;
+        public DockableWindow()
+        {
+            contentContainer = new ContentControl();
+            this.Content = contentContainer;
         }
 
         public void SetupDockablePane(DockablePaneProviderData data)
         {
             data.FrameworkElement = this;
+        }
+
+        public void SetInternalContent(UIElement newContent)
+        {
+            contentContainer.Content = newContent;
         }
     }
 }
