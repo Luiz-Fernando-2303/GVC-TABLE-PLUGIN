@@ -11,32 +11,6 @@ namespace GVC_TABLE_PLUGIN.Components
 {
     public static class TableInterface
     {
-        public static void UpdatePanel(string guid, string html, WinForms.Form form)
-        {
-            var dockableWindow = TableInterfaceRegister.GetRegisteredWindow(guid);
-
-            if (dockableWindow == null)
-            {
-                WinForms.MessageBox.Show("Painel não encontrado ou não registrado.");
-                return;
-            }
-
-            UIElement newContent = null;
-
-            if (!string.IsNullOrEmpty(html))
-            {
-                var browser = new WinForms.WebBrowser();
-                browser.DocumentText = html;
-                newContent = new WindowsFormsHost { Child = browser };
-            }
-            else if (form != null)
-            {
-                newContent = new WindowsFormsHost { Child = form };
-            }
-
-            dockableWindow.SetInternalContent(newContent);
-        }
-
         public static DockablePane GetPanel(string guid)
         {
             try
@@ -69,17 +43,15 @@ namespace GVC_TABLE_PLUGIN.Components
             return new DockablePaneId(new Guid(guid));
         }
 
-        public static void RegisterPanel(UIControlledApplication application, string name, string guid, string html, WinForms.Form form)
+        public static void RegisterPanel(UIControlledApplication application, string name, string guid, object content)
         {
             try
             {
                 DockablePaneId paneId = GetPaneId(guid);
 
-                var panel = new DockableWindow();
+                var panel = new DockableWindow(content);
                 RegisteredWindows[guid] = panel;
-
                 application.RegisterDockablePane(paneId, name, panel);
-                TableInterface.UpdatePanel(guid, html, form);
             }
             catch (Exception ex)
             {
@@ -94,24 +66,57 @@ namespace GVC_TABLE_PLUGIN.Components
         }
     }
 
-    public class DockableWindow : System.Windows.Controls.UserControl, IDockablePaneProvider
+    public class DockableWindow : UserControl, IDockablePaneProvider
     {
         private readonly ContentControl contentContainer;
 
-        public DockableWindow()
+        public DockableWindow(object content)
         {
             contentContainer = new ContentControl();
             this.Content = contentContainer;
+            SetInternalContent(content);
         }
 
         public void SetupDockablePane(DockablePaneProviderData data)
         {
             data.FrameworkElement = this;
+            data.InitialState = new DockablePaneState
+            {
+                DockPosition = DockPosition.Right
+            };
         }
 
-        public void SetInternalContent(UIElement newContent)
+        private void SetInternalContent(object newContent)
         {
-            contentContainer.Content = newContent;
+            if (newContent is string htmlString)
+            {
+                var browser = new System.Windows.Forms.WebBrowser();
+                browser.DocumentText = htmlString;
+
+                var host = new WindowsFormsHost
+                {
+                    Child = browser
+                };
+
+                contentContainer.Content = host;
+            }
+            else if (newContent is System.Windows.Forms.Form form)
+            {
+                form.TopLevel = false;
+                form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                form.Show();
+
+                var host = new WindowsFormsHost
+                {
+                    Child = form
+                };
+
+                contentContainer.Content = host;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid content type. Only HTML strings and WinForms.Forms are supported.");
+            }
         }
     }
 }
